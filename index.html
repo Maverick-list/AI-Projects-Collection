@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{YOUR_NAME}} | Full-Stack & AI Developer</title>
+    <meta name="description"
+        content="Portfolio of {{YOUR_NAME}}, a Full-Stack and AI Developer specializing in modern web experiences and intelligent systems.">
+
+    <!-- Fonts: Outfit for Headings, Inter for Body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="dark-theme">
+    <!-- Skip to Content -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Navbar -->
+    <header class="navbar" id="navbar">
+        <div class="container nav-wrapper">
+            <a href="#" class="logo" aria-label="Home">
+                {{INITIALS}}<span>.</span>
+            </a>
+            <nav class="nav-links" id="nav-menu">
+                <ul>
+                    <li><a href="#hero" class="nav-link active">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#skills" class="nav-link">Skills</a></li>
+                    <li><a href="#projects" class="nav-link">Projects</a></li>
+                    <li><a href="#experience" class="nav-link">Experience</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                    <li><a href="universe.html" class="nav-link universe-nav">Universe</a></li>
+                </ul>
+            </nav>
+            <button class="mobile-toggle" aria-controls="nav-menu" aria-expanded="false" aria-label="Menu">
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section id="hero" class="hero section-lg">
+            <div class="hero-bg-effect"></div>
+            <div class="container">
+                <div class="hero-content">
+                    <span class="hero-eyebrow reveal">Available for new opportunities</span>
+                    <h1 class="hero-title reveal">
+                        I'm <span class="highlight">{{YOUR_NAME}}</span>.
+                    </h1>
+                    <h2 class="hero-subtitle reveal">
+                        I build <span class="accent">intelligent systems</span> & world-class digital experiences.
+                    </h2>
+                    <p class="hero-description reveal">
+                        Specializing in Full-Stack Development and AI integration. I bridge the gap between complex
+                        logic and human-centric design.
+                    </p>
+                    <div class="hero-actions reveal">
+                        <a href="#projects" class="btn btn-primary">View My Work</a>
+                        <a href="#" class="btn btn-outline" download>Download CV</a>
+                    </div>
+                </div>
+            </div>
+            <div class="scroll-indicator reveal">
+                <div class="mouse"></div>
+                <span>Scroll Down</span>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about section">
+            <div class="container grid-2">
+                <div class="about-image reveal">
+                    <div class="image-box">
+                        <!-- Placeholder for Profile Image -->
+                        <div class="image-placeholder">Profile</div>
+                        <div class="image-border"></div>
+                    </div>
+                </div>
+                <div class="about-info">
+                    <span class="section-badge reveal">About Me</span>
+                    <h2 class="section-title reveal">Driven by curiosity, fueled by <span
+                            class="highlight">innovation</span>.</h2>
+                    <div class="reveal">
+                        <p>Hello! I'm {{YOUR_NAME}}, a developer who thrives at the intersection of powerful AI and
+                            elegant web interfaces. With a background in computer science and a passion for
+                            problem-solving, I help companies turn complex ideas into scalable reality.</p>
+                        <p>My focus is on creating software that not only works perfectly under the hood but also
+                            provides a seamless, intuitive experience for every user.</p>
+                    </div>
+                    <div class="about-stats reveal">
+                        <div class="stat-item">
+                            <span class="stat-number">5+</span>
+                            <span class="stat-label">Years Experience</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">20+</span>
+                            <span class="stat-label">Projects Completed</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">10+</span>
+                            <span class="stat-label">Global Clients</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack / Skills Section -->
+        <section id="skills" class="skills section bg-alt">
+            <div class="container">
+                <div class="section-header text-center">
+                    <span class="section-badge reveal">Expertise</span>
+                    <h2 class="section-title reveal">Tech Stack & Mastery</h2>
+                </div>
+                <div class="skills-grid reveal">
+                    <div class="skill-card">
+                        <div class="skill-icon">
+                            <!-- Visual Icon Placeholder -->
+                            <div class="icon-orb"></div>
+                        </div>
+                        <h3>Frontend</h3>
+                        <ul class="skill-list">
+                            <li>React.js / Next.js</li>
+                            <li>TypeScript</li>
+                            <li>Tailwind / Modern CSS</li>
+                            <li>Three.js / Canvas</li>
+                        </ul>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">
+                            <div class="icon-orb backend"></div>
+                        </div>
+                        <h3>Backend</h3>
+                        <ul class="skill-list">
+                            <li>Node.js / Express</li>
+                            <li>Python / Django</li>
+                            <li>PostgreSQL / MongoDB</li>
+                            <li>GraphQL / REST</li>
+                        </ul>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">
+                            <div class="icon-orb ai"></div>
+                        </div>
+                        <h3>AI & Data</h3>
+                        <ul class="skill-list">
+                            <li>TensorFlow / PyTorch</li>
+                            <li>OpenCV / Mediapipe</li>
+                            <li>LLM Integration</li>
+                            <li>Data Visualization</li>
+                        </ul>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-icon">
+                            <div class="icon-orb tools"></div>
+                        </div>
+                        <h3>Tools & DevOps</h3>
+                        <ul class="skill-list">
+                            <li>Git / GitHub Actions</li>
+                            <li>Docker / Kubernetes</li>
+                            <li>AWS / Vercel</li>
+                            <li>CI/CD Pipelines</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Projects Section -->
+        <section id="projects" class="projects section">
+            <div class="container">
+                <div class="section-header flex-between">
+                    <div>
+                        <span class="section-badge reveal">Work</span>
+                        <h2 class="section-title reveal">Featured Projects</h2>
+                    </div>
+                    <a href="universe.html" class="btn-link reveal">Explore the Universe &rarr;</a>
+                </div>
+                <div class="projects-grid">
+                    <!-- Project 1 -->
+                    <article class="project-card reveal">
+                        <div class="project-img">
+                            <div class="img-overlay"></div>
+                            <span class="project-category">Full-Stack / 3D</span>
+                        </div>
+                        <div class="project-details">
+                            <h3>{{PROJECT_TITLE_1}}</h3>
+                            <p class="role-badge">Lead Developer</p>
+                            <p>A high-performance web application featuring real-time data sync and advanced interactive
+                                visualizations.</p>
+                            <div class="project-tags">
+                                <span>React</span>
+                                <span>Three.js</span>
+                                <span>Node.js</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="#" class="link-item" aria-label="Demo">Live Demo</a>
+                                <a href="#" class="link-item secondary" aria-label="Source code">GitHub</a>
+                            </div>
+                        </div>
+                    </article>
+                    <!-- Project 2 -->
+                    <article class="project-card reveal">
+                        <div class="project-img">
+                            <div class="img-overlay"></div>
+                            <span class="project-category">AI / Computer Vision</span>
+                        </div>
+                        <div class="project-details">
+                            <h3>{{PROJECT_TITLE_2}}</h3>
+                            <p class="role-badge">AI Engineer</p>
+                            <p>Cutting-edge computer vision system for real-time gesture recognition and human-computer
+                                interaction.</p>
+                            <div class="project-tags">
+                                <span>Python</span>
+                                <span>OpenCV</span>
+                                <span>TensorFlow</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="#" class="link-item" aria-label="Demo">Video</a>
+                                <a href="#" class="link-item secondary" aria-label="Source code">Code</a>
+                            </div>
+                        </div>
+                    </article>
+                    <!-- More projects follow same pattern... -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Section -->
+        <section id="experience" class="experience section bg-alt">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-badge reveal">History</span>
+                    <h2 class="section-title reveal">Experience & Achievements</h2>
+                </div>
+                <div class="timeline reveal">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="time">2023 - Present</span>
+                            <h3>Senior Software Engineer</h3>
+                            <p class="location">{{COMPANY_NAME}} | Remote</p>
+                            <p>Leading the development of core AI modules and architecting scalable backend systems for
+                                international clients.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="time">2021 - 2023</span>
+                            <h3>Full-Stack Developer</h3>
+                            <p class="location">{{AGENCY_NAME}} | London, UK</p>
+                            <p>Developed complex React applications and optimized database performance, improving load
+                                times by 40%.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="time">2020</span>
+                            <h3>Hackathon Winner</h3>
+                            <p class="location">Global AI Challenge</p>
+                            <p>Won first place among 200+ teams for building an innovative accessibility tool using
+                                computer vision.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials (Optional) -->
+        <section class="testimonials section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <span class="section-badge reveal">Social Proof</span>
+                    <h2 class="section-title reveal">Recommendations</h2>
+                </div>
+                <div class="testimonial-grid reveal">
+                    <div class="testimonial-card">
+                        <p class="quote">"{{PLACEHOLDER_TESTIMONIAL_TEXT_1}}"</p>
+                        <div class="client-info">
+                            <div class="client-avatar"></div>
+                            <div>
+                                <h4>{{CLIENT_NAME_1}}</h4>
+                                <span>CEO at {{COMPANY_1}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="quote">"{{PLACEHOLDER_TESTIMONIAL_TEXT_2}}"</p>
+                        <div class="client-info">
+                            <div class="client-avatar"></div>
+                            <div>
+                                <h4>{{CLIENT_NAME_2}}</h4>
+                                <span>CTO at {{COMPANY_2}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact section">
+            <div class="container grid-2">
+                <div class="contact-info">
+                    <span class="section-badge reveal">Get In Touch</span>
+                    <h2 class="section-title reveal">Ready to start your next <span class="highlight">project?</span>
+                    </h2>
+                    <p class="reveal">I'm always open to discussing new opportunities, creative ideas, or partnerships.
+                        Let's build something exceptional together.</p>
+                    <div class="contact-methods reveal">
+                        <a href="mailto:{{YOUR_EMAIL}}" class="contact-item">
+                            <span class="icon">@</span>
+                            <span>{{YOUR_EMAIL}}</span>
+                        </a>
+                        <div class="social-links">
+                            <a href="#" aria-label="GitHub">Gh</a>
+                            <a href="#" aria-label="LinkedIn">Li</a>
+                            <a href="#" aria-label="X">X</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form-wrapper reveal">
+                    <form id="contact-form" class="styled-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" name="name" placeholder="John Doe" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" placeholder="Tell me about your project..."
+                                required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary submit-btn">
+                            Send Message
+                            <span class="btn-icon">&rarr;</span>
+                        </button>
+                    </form>
+                    <div id="form-status" class="form-status hidden"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-wrapper">
+            <div class="footer-top">
+                <a href="#" class="logo footer-logo">{{INITIALS}}<span>.</span></a>
+                <ul class="footer-nav">
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#projects">Work</a></li>
+                    <li><a href="universe.html">Universe</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="year"></span> {{YOUR_NAME}}. Built with precision and passion.</p>
+                <div class="footer-social">
+                    <a href="#">GitHub</a>
+                    <a href="#">LinkedIn</a>
+                    <a href="#">Twitter</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button id="scroll-top" class="scroll-top" aria-label="Scroll to top">
+        <span>&uarr;</span>
+    </button>
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+</body>
+
+</html>

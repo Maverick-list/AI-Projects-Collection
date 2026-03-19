@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}Live Teaching{% endblock %}
+{% block header_title %}Kelas Virtual Live{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Active Classes List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Mock Active Class Card -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="p-3 bg-red-100 text-red-600 rounded-xl animate-pulse">📹</div>
+                <div>
+                    <h4 class="font-bold text-gray-800">X IPA 1 - Fiqih</h4>
+                    <span class="text-xs text-green-600 font-bold bg-green-100 px-2 py-1 rounded">SEDANG
+                        BERLANGSUNG</span>
+                </div>
+            </div>
+            <button onclick="joinMeeting('X-IPA-1-Fiqih')"
+                class="w-full bg-madrasah text-white py-2 rounded-xl font-bold hover:bg-green-800">
+                Gabung Kelas
+            </button>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 opacity-60">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="p-3 bg-gray-100 text-gray-600 rounded-xl">📅</div>
+                <div>
+                    <h4 class="font-bold text-gray-800">X IPA 1 - Bahasa Arab</h4>
+                    <span class="text-xs text-gray-500 font-bold bg-gray-100 px-2 py-1 rounded">Jadwal: 10:00 WIB</span>
+                </div>
+            </div>
+            <button disabled class="w-full bg-gray-200 text-gray-400 py-2 rounded-xl font-bold cursor-not-allowed">
+                Belum Dimulai
+            </button>
+        </div>
+    </div>
+
+    <!-- Jitsi Container -->
+    <div id="meet-container" class="hidden bg-gray-900 rounded-3xl overflow-hidden shadow-lg h-[600px] relative">
+        <div id="meet" class="w-full h-full"></div>
+    </div>
+</div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script>
+    let api = null;
+
+    function joinMeeting(roomSuffix) {
+        const roomName = "MAS_Jeumala_" + roomSuffix.replace(/\s+/g, '_');
+        const domain = "meet.jit.si";
+
+        document.getElementById('meet-container').classList.remove('hidden');
+        document.getElementById('meet-container').scrollIntoView({ behavior: 'smooth' });
+
+        const options = {
+            roomName: roomName,
+            width: "100%",
+            height: "100%",
+            parentNode: document.querySelector('#meet'),
+            userInfo: {
+                displayName: "Siswa - {{ current_user.nama }}" // Inject student name
+            },
+            configOverwrite: {
+                startWithAudioMuted: true,
+                startWithVideoMuted: true
+            }
+        };
+
+        if (api) {
+            api.dispose();
+        }
+
+        api = new JitsiMeetExternalAPI(domain, options);
+    }
+</script>
+{% endblock %}
