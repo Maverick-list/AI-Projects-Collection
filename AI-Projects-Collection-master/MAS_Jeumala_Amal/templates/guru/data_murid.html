@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}Data Murid Terdaftar{% endblock %}
+{% block header_title %}Manajemen Data Murid{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="p-8 border-b border-gray-100 flex justify-between items-center">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Server Data Murid</h4>
+            <p class="text-sm text-gray-500">Daftar lengkap murid MAS Jeumala Amal.</p>
+        </div>
+        <div class="flex gap-4">
+            <a href="{{ url_for('api_extra.export_murid_csv') }}"
+                class="px-5 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition flex items-center gap-2">
+                <span>📥</span> Export CSV
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                <tr>
+                    <th class="px-8 py-5">Nama</th>
+                    <th class="px-8 py-5">NIS</th>
+                    <th class="px-8 py-5">Kelas</th>
+                    <th class="px-8 py-5">Email</th>
+                    <th class="px-8 py-5">Kontak Ortu</th>
+                    <th class="px-8 py-5 text-right">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for murid in murid_list %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-8 py-5 font-bold text-gray-800">{{ murid.nama }}</td>
+                    <td class="px-8 py-5 text-sm text-gray-500 font-mono">{{ murid.nis }}</td>
+                    <td class="px-8 py-5 text-sm font-semibold">{{ murid.kelas }}</td>
+                    <td class="px-8 py-5 text-sm text-gray-500">{{ murid.email }}</td>
+                    <td class="px-8 py-5 text-sm text-gray-500">{{ murid.parent_contact or '-' }}</td>
+                    <td class="px-8 py-5 text-right">
+                        <button class="text-blue-500 hover:underline font-bold text-xs">Profil</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

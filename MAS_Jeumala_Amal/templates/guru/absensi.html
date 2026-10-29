@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{% block title %}Absensi Digital{% endblock %}
+{% block header_title %}Rekap Absensi Siswa{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div
+        class="mb-4 p-3 rounded-xl text-sm font-bold {{ 'bg-green-100 text-green-700' if category == 'success' else 'bg-red-100 text-red-700' }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Presensi Harian</h4>
+            <p class="text-sm text-gray-500">Pantau kehadiran siswa secara real-time.</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ url_for('guru.absensi_export') }}"
+                class="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-200">Export
+                Rekap (CSV)</a>
+            <button onclick="document.getElementById('modal-absensi').classList.remove('hidden')"
+                class="bg-madrasah text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-800 shadow-lg shadow-green-900/20">+
+                Input Manual</button>
+        </div>
+    </div>
+
+    <!-- Statistik Singkat (Static for now, could be dynamic) -->
+    <div class="grid grid-cols-4 gap-4 mb-8">
+        <div class="bg-green-50 p-4 rounded-2xl border border-green-100 text-center">
+            <span class="block text-xl font-bold text-green-700">Live</span>
+            <span class="text-xs text-green-600 font-semibold">Status</span>
+        </div>
+        <!-- ... other stats ... -->
+    </div>
+
+    <!-- Tabel Absensi Latest -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                <tr>
+                    <th class="px-6 py-4 rounded-l-xl">Waktu</th>
+                    <th class="px-6 py-4">Nama Siswa</th>
+                    <th class="px-6 py-4">Kelas</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4 rounded-r-xl">Metode</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for log in attendance_list %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-xs font-mono text-gray-500">{{ log.timestamp.strftime('%H:%M - %d %b') }}
+                    </td>
+                    <td class="px-6 py-4 font-bold text-gray-800">{{ log.nama }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ log.kelas }}</td>
+                    <td class="px-6 py-4">
+                        {% if log.status == 'Hadir' %}
+                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">{{ log.status
+                            }}</span>
+                        {% elif log.status == 'Sakit' or log.status == 'Izin' %}
+                        <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">{{ log.status
+                            }}</span>
+                        {% else %}
+                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">{{ log.status
+                            }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">{{ log.method }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-8 text-gray-400">Belum ada data absensi.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Input Absensi Manual -->
+<div id="modal-absensi" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl">
+        <h3 class="text-xl font-bold mb-4">Input Absensi Manual</h3>
+        <form method="POST" action="{{ url_for('guru.absensi') }}">
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-1">Nama Siswa</label>
+                <select name="student_id" required class="w-full border rounded-xl p-2 bg-gray-50">
+                    {% for student in students %}
+                    <option value="{{ student.id }}">{{ student.nama }} - {{ student.kelas }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-1">Tanggal</label>
+                <input type="date" name="date" required class="w-full border rounded-xl p-2 bg-gray-50">
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-1">Status Kehadiran</label>
+                <select name="status" required class="w-full border rounded-xl p-2 bg-gray-50">
+                    <option value="Hadir">Hadir</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Alpa">Alpa</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('modal-absensi').classList.add('hidden')"
+                    class="px-4 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Batal</button>
+                <button type="submit"
+                    class="bg-madrasah text-white px-6 py-2 rounded-xl font-bold hover:bg-green-800">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

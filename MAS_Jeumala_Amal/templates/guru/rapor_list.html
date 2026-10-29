@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+
+{% block title %}Rapor Digital{% endblock %}
+{% block header_title %}Input & Kelola Nilai{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div
+        class="mb-4 p-3 rounded-xl text-sm font-bold {{ 'bg-green-100 text-green-700' if category == 'success' else 'bg-red-100 text-red-700' }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Daftar Nilai Siswa</h4>
+            <p class="text-sm text-gray-500">Kelola nilai akademik siswa.</p>
+        </div>
+        <button onclick="document.getElementById('modal-add').classList.remove('hidden')"
+            class="bg-madrasah text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-800 shadow-lg shadow-green-900/20">
+            + Input Nilai Baru
+        </button>
+    </div>
+
+    <!-- Tabel Nilai -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-gray-50 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+                <tr>
+                    <th class="px-6 py-4 rounded-l-xl">Nama Siswa</th>
+                    <th class="px-6 py-4">Kelas</th>
+                    <th class="px-6 py-4">Mata Pelajaran</th>
+                    <th class="px-6 py-4">Tugas (30%)</th>
+                    <th class="px-6 py-4">UTS (30%)</th>
+                    <th class="px-6 py-4">UAS (40%)</th>
+                    <th class="px-6 py-4">Total</th>
+                    <th class="px-6 py-4">Grade</th>
+                    <th class="px-6 py-4 rounded-r-xl">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for grade in grades %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-bold text-gray-800">{{ grade.nama }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ grade.kelas }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ grade.subject }}</td>
+                    <td class="px-6 py-4 text-sm">{{ grade.tugas }}</td>
+                    <td class="px-6 py-4 text-sm">{{ grade.uts }}</td>
+                    <td class="px-6 py-4 text-sm">{{ grade.uas }}</td>
+                    <td class="px-6 py-4 font-bold text-blue-600">{{ "%.1f"|format(grade.total) }}</td>
+                    <td class="px-6 py-4"><span class="bg-gray-100 px-2 py-1 rounded font-bold">{{ grade.grade_letter
+                            }}</span></td>
+                    <td class="px-6 py-4 flex gap-2">
+                        <button
+                            onclick="openEditModal('{{ grade.id }}', '{{ grade.student_id }}', '{{ grade.subject }}', '{{ grade.tugas }}', '{{ grade.uts }}', '{{ grade.uas }}', '{{ grade.term }}')"
+                            class="text-blue-500 hover:text-blue-700">✏️</button>
+                        <form method="POST" action="{{ url_for('guru.rapor_list') }}"
+                            onsubmit="return confirm('Yakin hapus nilai ini?');" class="inline">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="grade_id" value="{{ grade.id }}">
+                            <button type="submit" class="text-red-500 hover:text-red-700">🗑</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-8 text-gray-400">Belum ada data nilai.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Input Nilai -->
+<div id="modal-add" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl">
+        <h3 class="text-xl font-bold mb-4">Input Nilai Baru</h3>
+        <form method="POST" action="{{ url_for('guru.rapor_list') }}">
+            <input type="hidden" name="action" value="add">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold mb-1">Siswa</label>
+                    <select name="student_id" required class="w-full border rounded-xl p-2 bg-gray-50">
+                        {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.nama }} - {{ student.kelas }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold mb-1">Mata Pelajaran</label>
+                    <select name="subject" required class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="Fiqih">Fiqih</option>
+                        <option value="Aqidah Akhlak">Aqidah Akhlak</option>
+                        <option value="Bahasa Arab">Bahasa Arab</option>
+                        <option value="Matematika">Matematika</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Semester</label>
+                    <select name="term" required class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="Ganjil 2024">Ganjil 2024</option>
+                        <option value="Genap 2024">Genap 2024</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Nilai Tugas</label>
+                    <input type="number" name="tugas" step="0.1" required class="w-full border rounded-xl p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Nilai UTS</label>
+                    <input type="number" name="uts" step="0.1" required class="w-full border rounded-xl p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Nilai UAS</label>
+                    <input type="number" name="uas" step="0.1" required class="w-full border rounded-xl p-2">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('modal-add').classList.add('hidden')"
+                    class="px-4 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Batal</button>
+                <button type="submit"
+                    class="bg-madrasah text-white px-6 py-2 rounded-xl font-bold hover:bg-green-800">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Nilai -->
+<div id="modal-edit" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-lg shadow-2xl">
+        <h3 class="text-xl font-bold mb-4">Edit Nilai</h3>
+        <form method="POST" action="{{ url_for('guru.rapor_list') }}">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="grade_id" id="edit-grade-id">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Student is usually fixed in edit, but can be changeable or just hidden/readonly. Kept basic for now. -->
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold mb-1">Siswa</label>
+                    <select name="student_id" id="edit-student-id" required
+                        class="w-full border rounded-xl p-2 bg-gray-50">
+                        {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.nama }} - {{ student.kelas }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold mb-1">Mata Pelajaran</label>
+                    <select name="subject" id="edit-subject" required class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="Fiqih">Fiqih</option>
+                        <option value="Aqidah Akhlak">Aqidah Akhlak</option>
+                        <option value="Bahasa Arab">Bahasa Arab</option>
+                        <option value="Matematika">Matematika</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Semester</label>
+                    <select name="term" id="edit-term" required class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="Ganjil 2024">Ganjil 2024</option>
+                        <option value="Genap 2024">Genap 2024</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Nilai Tugas</label>
+                    <input type="number" name="tugas" id="edit-tugas" step="0.1" required
+                        class="w-full border rounded-xl p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Nilai UTS</label>
+                    <input type="number" name="uts" id="edit-uts" step="0.1" required
+                        class="w-full border rounded-xl p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Nilai UAS</label>
+                    <input type="number" name="uas" id="edit-uas" step="0.1" required
+                        class="w-full border rounded-xl p-2">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('modal-edit').classList.add('hidden')"
+                    class="px-4 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Batal</button>
+                <button type="submit"
+                    class="bg-madrasah text-white px-6 py-2 rounded-xl font-bold hover:bg-green-800">Simpan
+                    Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(id, studentId, subject, tugas, uts, uas, term) {
+        document.getElementById('edit-grade-id').value = id;
+        document.getElementById('edit-student-id').value = studentId;
+        document.getElementById('edit-subject').value = subject;
+        document.getElementById('edit-term').value = term;
+        document.getElementById('edit-tugas').value = tugas;
+        document.getElementById('edit-uts').value = uts;
+        document.getElementById('edit-uas').value = uas;
+        document.getElementById('modal-edit').classList.remove('hidden');
+    }
+</script>
+{% endblock %}

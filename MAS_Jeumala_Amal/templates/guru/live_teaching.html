@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+
+{% block title %}Live Teaching{% endblock %}
+{% block header_title %}Kelas Virtual Live{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Controls -->
+    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center">
+        <div>
+            <h4 class="text-lg font-bold text-gray-800">Ruang Kelas Virtual</h4>
+            <p class="text-sm text-gray-500">Mulai sesi pembelajaran tatap muka via video.</p>
+        </div>
+        <div class="flex gap-2">
+            <input type="text" id="room-name" placeholder="Nama Ruang (ex: X-IPA-1-Fiqih)"
+                class="px-4 py-2 border rounded-xl text-sm focus:border-green-500 outline-none w-64">
+            <button onclick="startMeeting()"
+                class="bg-madrasah text-white px-6 py-2 rounded-xl font-bold hover:bg-green-800 transition">
+                Mulai Kelas Live 📹
+            </button>
+        </div>
+    </div>
+
+    <!-- Jitsi Container -->
+    <div class="bg-gray-900 rounded-3xl overflow-hidden shadow-lg h-[600px] relative">
+        <div id="meet" class="w-full h-full"></div>
+
+        <!-- Placeholder before start -->
+        <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-white bg-gray-800">
+            <span class="text-6xl mb-4">📹</span>
+            <h3 class="text-2xl font-bold">Siap Mengajar?</h3>
+            <p class="text-gray-400 mt-2">Masukkan nama ruang kelas dan klik tombol "Mulai Kelas Live" di atas.</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://meet.jit.si/external_api.js"></script>
+<script>
+    let api = null;
+
+    function startMeeting() {
+        const roomNameInput = document.getElementById('room-name').value;
+        const roomName = roomNameInput ? "MAS_Jeumala_" + roomNameInput.replace(/\s+/g, '_') : "MAS_Jeumala_General";
+
+        const domain = "meet.jit.si";
+        const options = {
+            roomName: roomName,
+            width: "100%",
+            height: "100%",
+            parentNode: document.querySelector('#meet'),
+            userInfo: {
+                displayName: "Guru - {{ current_user.nama }}" // Inject current user name
+            },
+            configOverwrite: {
+                startWithAudioMuted: false,
+                startWithVideoMuted: false
+            },
+            interfaceConfigOverwrite: {
+                TOOLBAR_BUTTONS: [
+                    'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                    'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                    'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                    'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                    'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+                    'security'
+                ]
+            }
+        };
+
+        // Clear previous instance if any
+        if (api) {
+            api.dispose();
+        }
+
+        document.getElementById('placeholder').style.display = 'none';
+        api = new JitsiMeetExternalAPI(domain, options);
+    }
+</script>
+{% endblock %}

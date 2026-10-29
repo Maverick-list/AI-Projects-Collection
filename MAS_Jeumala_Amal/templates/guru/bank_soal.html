@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block title %}Bank Soal{% endblock %}
+{% block header_title %}Kelola Bank Soal{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div
+        class="mb-4 p-3 rounded-xl text-sm font-bold {{ 'bg-green-100 text-green-700' if category == 'success' else 'bg-red-100 text-red-700' }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h4 class="text-xl font-bold text-gray-800">Bank Soal Saya</h4>
+            <p class="text-sm text-gray-500">Kumpulan soal ujian dan kuis.</p>
+        </div>
+        <button onclick="openAddModal()"
+            class="bg-madrasah text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-800 shadow-lg shadow-green-900/20">
+            + Tambah Soal Baru
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4">
+        {% for q in questions %}
+        <div class="border border-gray-200 rounded-2xl p-6 hover:border-green-300 transition group">
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex gap-2 text-xs font-bold text-gray-500 uppercase">
+                    <span class="bg-gray-100 px-2 py-1 rounded">{{ q.subject }}</span>
+                    <span class="bg-gray-100 px-2 py-1 rounded">{{ q.grade_level }}</span>
+                    <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded">{{ q.question_type }}</span>
+                    <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded">Bobot: {{ q.weight }}</span>
+                </div>
+                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <button data-id="{{ q.id }}" data-subject="{{ q.subject }}" data-grade="{{ q.grade_level }}"
+                        data-type="{{ q.question_type }}" data-text="{{ q.text }}"
+                        data-options='{{ q.options|default("[]") }}' data-answer="{{ q.correct_answer }}"
+                        data-weight="{{ q.weight }}" onclick="openEditModal(this)"
+                        class="text-blue-500 hover:text-blue-700">✏️</button>
+                    <form method="POST" action="{{ url_for('guru.bank_soal') }}"
+                        onsubmit="return confirm('Yakin hapus soal ini?');" class="inline">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="question_id" value="{{ q.id }}">
+                        <button type="submit" class="text-red-500 hover:text-red-700">🗑</button>
+                    </form>
+                </div>
+            </div>
+
+            <p class="font-bold text-gray-800 mb-3">{{ q.text }}</p>
+
+            {% if q.question_type == 'PG' %}
+            <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                {% set letters = ['A', 'B', 'C', 'D'] %}
+                {% for opt in q.parsed_options %}
+                <div class="{{ 'text-green-700 font-bold' if q.correct_answer == opt else '' }}">
+                    <span class="font-bold mr-1">{{ letters[loop.index0] }}.</span> {{ opt }}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-gray-600 mb-3">
+                <span class="font-bold">Kunci Jawaban:</span> {{ q.correct_answer }}
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="text-center py-12 text-gray-400">
+            Belum ada soal dibuat.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal Form (Shared for Add/Edit) -->
+<div id="modal-form"
+    class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-2xl shadow-2xl my-8">
+        <h3 class="text-xl font-bold mb-4" id="modal-title">Tambah Soal Baru</h3>
+        <form method="POST" action="{{ url_for('guru.bank_soal') }}" id="question-form">
+            <input type="hidden" name="action" value="add" id="form-action">
+            <input type="hidden" name="question_id" id="form-question-id">
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-bold mb-1">Mata Pelajaran</label>
+                    <select name="subject" id="subject" class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="Fiqih">Fiqih</option>
+                        <option value="Aqidah Akhlak">Aqidah Akhlak</option>
+                        <option value="Bahasa Arab">Bahasa Arab</option>
+                        <option value="Matematika">Matematika</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Kelas</label>
+                    <select name="grade_level" id="grade_level" class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="X">Kelas X</option>
+                        <option value="XI">Kelas XI</option>
+                        <option value="XII">Kelas XII</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Jenis Soal</label>
+                    <select name="question_type" id="question_type" onchange="toggleOptions()"
+                        class="w-full border rounded-xl p-2 bg-gray-50">
+                        <option value="PG">Pilihan Ganda</option>
+                        <option value="Essay">Essay</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1">Bobot Nilai</label>
+                    <input type="number" name="weight" id="weight" value="1" class="w-full border rounded-xl p-2">
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold mb-1">Pertanyaan</label>
+                    <textarea name="text" id="text" rows="3" required class="w-full border rounded-xl p-2"></textarea>
+                </div>
+
+                <!-- PG Options -->
+                <div id="pg-options" class="col-span-2 grid grid-cols-2 gap-4">
+                    <div class="col-span-2 text-sm text-gray-500 font-bold border-t pt-4">Pilihan Jawaban (untuk PG)
+                    </div>
+                    <div>
+                        <input type="text" name="opt_a" id="opt_a" placeholder="Opsi A"
+                            class="w-full border rounded-xl p-2">
+                    </div>
+                    <div>
+                        <input type="text" name="opt_b" id="opt_b" placeholder="Opsi B"
+                            class="w-full border rounded-xl p-2">
+                    </div>
+                    <div>
+                        <input type="text" name="opt_c" id="opt_c" placeholder="Opsi C"
+                            class="w-full border rounded-xl p-2">
+                    </div>
+                    <div>
+                        <input type="text" name="opt_d" id="opt_d" placeholder="Opsi D"
+                            class="w-full border rounded-xl p-2">
+                    </div>
+                </div>
+
+                <div class="col-span-2">
+                    <label class="block text-sm font-bold mb-1">Kunci Jawaban</label>
+                    <input type="text" name="correct_answer" id="correct_answer" required
+                        placeholder="Teks jawaban benar" class="w-full border rounded-xl p-2">
+                    <p class="text-[10px] text-gray-400 mt-1">*Untuk PG, tulis ulang teks jawaban yang benar persis
+                        sesuai opsi.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="document.getElementById('modal-form').classList.add('hidden')"
+                    class="px-4 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-xl">Batal</button>
+                <button type="submit"
+                    class="bg-madrasah text-white px-6 py-2 rounded-xl font-bold hover:bg-green-800">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleOptions() {
+        const type = document.getElementById('question_type').value;
+        const pgDiv = document.getElementById('pg-options');
+        if (type === 'PG') {
+            pgDiv.classList.remove('hidden');
+            pgDiv.classList.add('grid');
+        } else {
+            pgDiv.classList.add('hidden');
+            pgDiv.classList.remove('grid');
+        }
+    }
+
+    function openAddModal() {
+        document.getElementById('modal-title').innerText = "Tambah Soal Baru";
+        document.getElementById('form-question-id').value = "";
+        document.getElementById('form-action').value = "add";
+        document.getElementById('question-form').reset();
+        toggleOptions();
+        document.getElementById('modal-form').classList.remove('hidden');
+    }
+
+    function openEditModal(btn) {
+        const id = btn.getAttribute('data-id');
+        const subject = btn.getAttribute('data-subject');
+        const grade = btn.getAttribute('data-grade');
+        const type = btn.getAttribute('data-type');
+        const text = btn.getAttribute('data-text');
+        const answer = btn.getAttribute('data-answer');
+        const weight = btn.getAttribute('data-weight');
+        const optionsStr = btn.getAttribute('data-options');
+
+        let options = [];
+        try {
+            options = JSON.parse(optionsStr);
+        } catch (e) {
+            console.error("Error parsing options", e);
+        }
+        document.getElementById('modal-title').innerText = "Edit Soal";
+        document.getElementById('form-question-id').value = id;
+        document.getElementById('form-action').value = "edit";
+
+        document.getElementById('subject').value = subject;
+        document.getElementById('grade_level').value = grade;
+        document.getElementById('question_type').value = type;
+        document.getElementById('text').value = text;
+        document.getElementById('correct_answer').value = answer;
+        document.getElementById('weight').value = weight;
+
+        if (type === 'PG' && options && options.length >= 4) {
+            document.getElementById('opt_a').value = options[0];
+            document.getElementById('opt_b').value = options[1];
+            document.getElementById('opt_c').value = options[2];
+            document.getElementById('opt_d').value = options[3];
+        }
+
+        toggleOptions();
+        document.getElementById('modal-form').classList.remove('hidden');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Cashier - Modern POS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .sidebar-active { background: #3b82f6; color: white; border-radius: 0.5rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+            <h2 class="text-3xl font-bold mb-6 text-slate-800">Welcome Back</h2>
+            <div id="login-error" class="hidden bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm"></div>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                    <input type="text" name="username" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="admin" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" name="password" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition">Login</button>
+            </form>
+            <p class="mt-4 text-center text-slate-500 text-sm">Default: admin / admin123</p>
+        </div>
+    </div>
+
+    <div id="app" class="hidden flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col">
+            <div class="p-6 border-b border-slate-100">
+                <h1 class="text-xl font-bold text-blue-600 flex items-center gap-2">
+                    <span class="p-2 bg-blue-100 rounded-lg">🛒</span> Simple Cashier
+                </h1>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition sidebar-active" id="btn-dashboard">
+                    <span>📊</span> Dashboard
+                </button>
+                <button onclick="navigate('pos')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition" id="btn-pos">
+                    <span>💳</span> Point of Sale
+                </button>
+                <button onclick="navigate('inventory')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition" id="btn-inventory">
+                    <span>📦</span> Inventory
+                </button>
+                <button onclick="navigate('reports')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 transition" id="btn-reports">
+                    <span>📑</span> Reports
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-100">
+                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition rounded-lg">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-8 relative">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 id="page-title" class="text-2xl font-bold text-slate-800">Dashboard</h2>
+                    <p id="page-subtitle" class="text-slate-500">Overview of your business performance.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="user-display" class="font-medium text-slate-700">Admin</span>
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">A</div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="sec-dashboard" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-green-100 text-green-600 rounded-xl font-bold">Rp</div>
+                            <div>
+                                <p class="text-sm text-slate-500">Daily Income</p>
+                                <h3 id="stat-income" class="text-2xl font-bold text-slate-800">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-xl font-bold">#</div>
+                            <div>
+                                <p class="text-sm text-slate-500">Total Stocks</p>
+                                <h3 id="stat-stocks" class="text-2xl font-bold text-slate-800">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-purple-100 text-purple-600 rounded-xl font-bold">TRX</div>
+                            <div>
+                                <p class="text-sm text-slate-500">Transactions Today</p>
+                                <h3 id="stat-trx" class="text-2xl font-bold text-slate-800">0</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-lg font-bold mb-4">Revenue Trend</h4>
+                    <div class="h-64">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- POS Section -->
+            <section id="sec-pos" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <input type="text" id="pos-search" placeholder="Search product name..." class="w-full px-5 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
+                    <div id="pos-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Products will be injected here -->
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[calc(100vh-12rem)]">
+                    <div class="p-6 border-b border-slate-100">
+                        <h4 class="text-lg font-bold flex items-center justify-between">
+                            Cart <span id="cart-count" class="text-sm font-normal bg-blue-100 text-blue-600 px-2 py-1 rounded-full">0 items</span>
+                        </h4>
+                    </div>
+                    <div id="cart-items" class="flex-1 overflow-y-auto p-4 space-y-3">
+                        <!-- Cart items -->
+                    </div>
+                    <div class="p-6 border-t border-slate-100 space-y-4">
+                        <div class="flex justify-between font-bold text-xl">
+                            <span>Total</span>
+                            <span id="cart-total" class="text-blue-600">Rp 0</span>
+                        </div>
+                        <button onclick="checkout()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition transform active:scale-95">Complete Transaction</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inventory Section -->
+            <section id="sec-inventory" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <input type="text" id="inv-search" placeholder="Search inventory..." class="px-5 py-3 w-64 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="openProductModal()" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">+ Add Product</button>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                            <tr>
+                                <th class="px-6 py-4">ID</th>
+                                <th class="px-6 py-4">Product Name</th>
+                                <th class="px-6 py-4">Price</th>
+                                <th class="px-6 py-4">Stock</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-table-body" class="divide-y divide-slate-100">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="sec-reports" class="hidden space-y-6">
+                <div class="flex justify-end">
+                    <a href="/api/export/csv" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition flex items-center gap-2">
+                        <span>📥</span> Export to CSV
+                    </a>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs font-bold">
+                            <tr>
+                                <th class="px-6 py-4">Transaction ID</th>
+                                <th class="px-6 py-4">Timestamp</th>
+                                <th class="px-6 py-4">Total Amount</th>
+                                <th class="px-6 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body" class="divide-y divide-slate-100">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[100] p-4">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-lg shadow-xl">
+            <h3 id="modal-title" class="text-xl font-bold mb-6">Add New Product</h3>
+            <form id="product-form" class="space-y-4">
+                <input type="hidden" name="id">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Product Name</label>
+                    <input type="text" name="name" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Price (Rp)</label>
+                        <input type="number" name="price" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Stock</label>
+                        <input type="number" name="stock" class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                    </div>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="closeProductModal()" class="flex-1 px-4 py-3 bg-slate-100 rounded-lg font-bold">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-bold">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        let products = [];
+        let cart = [];
+        let curUser = null;
+        let mainChart = null;
+
+        // Utilities
+        const formatIDR = (num) => 'Rp ' + Number(num).toLocaleString('id-ID');
+
+        // Auth
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                checkAuth();
+            } else {
+                const errBox = document.getElementById('login-error');
+                errBox.innerText = data.message;
+                errBox.classList.remove('hidden');
+            }
+        };
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    curUser = data.username;
+                    document.getElementById('user-display').innerText = curUser;
+                    document.getElementById('auth-overlay').classList.add('hidden');
+                    document.getElementById('app').classList.remove('hidden');
+                    navigate('dashboard');
+                }
+            } catch (e) {}
+        }
+
+        async function logout() {
+            await fetch('/api/auth/logout', {method: 'POST'});
+            location.reload();
+        }
+
+        // Navigation
+        function navigate(section) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`sec-${section}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('sidebar-active'));
+            document.getElementById(`btn-${section}`).classList.add('sidebar-active');
+
+            const titles = {
+                dashboard: ['Dashboard', 'Overview of your business performance.'],
+                pos: ['Point of Sale', 'Create and manage transactions here.'],
+                inventory: ['Inventory', 'Manage your product stock and prices.'],
+                reports: ['Reports', 'Track your financial performance.']
+            };
+            document.getElementById('page-title').innerText = titles[section][0];
+            document.getElementById('page-subtitle').innerText = titles[section][1];
+
+            if (section === 'dashboard') loadDashboard();
+            if (section === 'inventory') loadProducts();
+            if (section === 'pos') { loadProducts(); updateCartUI(); }
+            if (section === 'reports') loadReports();
+        }
+
+        // Inventory Logic
+        async function loadProducts() {
+            const res = await fetch('/api/products');
+            products = await res.json();
+            renderProductTable();
+            renderPOSGrid();
+        }
+
+        function renderProductTable() {
+            const body = document.getElementById('product-table-body');
+            const term = document.getElementById('inv-search').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+            
+            body.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-6 py-4 text-slate-500 font-mono text-sm">${p.id}</td>
+                    <td class="px-6 py-4 font-bold text-slate-800">${p.name}</td>
+                    <td class="px-6 py-4 text-slate-600">${formatIDR(p.price)}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${p.stock < 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
+                            ${p.stock} in stock
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="editProduct(${p.id})" class="text-blue-500 hover:text-blue-700 font-medium">Edit</button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-500 hover:text-red-700 font-medium">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('inv-search').oninput = renderProductTable;
+
+        function openProductModal(id = null) {
+            const modal = document.getElementById('product-modal');
+            const form = document.getElementById('product-form');
+            const title = document.getElementById('modal-title');
+            
+            form.reset();
+            form.id.value = '';
+            title.innerText = "Add New Product";
+            
+            if (id) {
+                const p = products.find(x => x.id === id);
+                form.id.value = p.id;
+                form.name.value = p.name;
+                form.price.value = p.price;
+                form.stock.value = p.stock;
+                title.innerText = "Edit Product";
+            }
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('product-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('product-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            const id = data.id;
+            
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/products/${id}` : '/api/products';
+            
+            await fetch(url, {
+                method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            closeProductModal();
+            loadProducts();
+        };
+
+        async function deleteProduct(id) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                await fetch(`/api/products/${id}`, {method: 'DELETE'});
+                loadProducts();
+            }
+        }
+
+        // POS Logic
+        function renderPOSGrid() {
+            const grid = document.getElementById('pos-grid');
+            const term = document.getElementById('pos-search').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+            
+            grid.innerHTML = filtered.map(p => `
+                <div onclick="addToCart(${p.id})" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:border-blue-500 cursor-pointer transition group">
+                    <div class="w-full h-32 bg-slate-100 rounded-xl mb-3 flex items-center justify-center text-3xl opacity-50 group-hover:opacity-100 transition">
+                        📦
+                    </div>
+                    <h5 class="font-bold text-slate-800 truncate">${p.name}</h5>
+                    <p class="text-blue-600 font-bold mt-1">${formatIDR(p.price)}</p>
+                    <p class="text-xs text-slate-400 mt-2">${p.stock} available</p>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('pos-search').oninput = renderPOSGrid;
+
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            if (p.stock <= 0) return alert('Out of stock!');
+            
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                if (existing.quantity >= p.stock) return alert('Insufficient stock!');
+                existing.quantity++;
+            } else {
+                cart.push({...p, quantity: 1});
+            }
+            updateCartUI();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items');
+            container.innerHTML = cart.map((item, i) => `
+                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+                    <div class="flex-1">
+                        <p class="font-bold text-sm text-slate-800">${item.name}</p>
+                        <p class="text-xs text-slate-500">${item.quantity} x ${formatIDR(item.price)}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-slate-700">${formatIDR(item.price * item.quantity)}</span>
+                        <button onclick="removeFromCart(${i})" class="text-red-400 hover:text-red-600 p-1">✕</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            document.getElementById('cart-total').innerText = formatIDR(total);
+            document.getElementById('cart-count').innerText = `${cart.length} items`;
+        }
+
+        async function checkout() {
+            if (cart.length === 0) return alert('Cart is empty!');
+            const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            
+            const res = await fetch('/api/transactions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({items: cart, total})
+            });
+            
+            const data = await res.json();
+            if (data.status === 'success') {
+                alert(`Transaction Successful! ID: ${data.transaction_id}`);
+                cart = [];
+                updateCartUI();
+                loadProducts();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        }
+
+        // Reports Logic
+        async function loadReports() {
+            const res = await fetch('/api/reports/summary');
+            const data = await res.json();
+            const body = document.getElementById('report-table-body');
+            body.innerHTML = data.recent_transactions.map(t => `
+                <tr>
+                    <td class="px-6 py-4 font-mono text-sm text-blue-600 font-bold">${t.transaction_id}</td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">${new Date(t.timestamp).toLocaleString()}</td>
+                    <td class="px-6 py-4 font-bold">${formatIDR(t.total_amount)}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button class="text-slate-400 hover:text-slate-600">Details</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Dashboard Logic
+        async function loadDashboard() {
+            const res = await fetch('/api/reports/summary');
+            const data = await res.json();
+            
+            document.getElementById('stat-income').innerText = formatIDR(data.daily_income);
+            document.getElementById('stat-stocks').innerText = data.total_stock;
+            document.getElementById('stat-trx').innerText = data.recent_transactions.length;
+
+            const ctx = document.getElementById('incomeChart').getContext('2d');
+            if (mainChart) mainChart.destroy();
+            
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.chart_data.map(d => d.date),
+                    datasets: [{
+                        label: 'Gross Revenue',
+                        data: data.chart_data.map(d => d.income),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#3b82f6',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'Rp ' + (v/1000) + 'k' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // Init
+        checkAuth();
+    </script>
+</body>
+</html>
